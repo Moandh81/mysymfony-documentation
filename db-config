@@ -1,0 +1,16 @@
+In .env file 
+
+
+In case of mysql DB :
+
+DATABASE_URL=mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=5.7
+
+
+In case of sqlite DB :
+
+# to use sqlite:
+
+DATABASE_URL="sqlite:///%kernel.project_dir%/var/app.db"
+
+
+
