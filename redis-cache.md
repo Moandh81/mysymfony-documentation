@@ -41,6 +41,15 @@ composer require predis/predis
         return $data ;
 
       } ) ;
+      
+      
+      
+       return $this->render('product/list.html.twig', [
+
+            'products' => $data
+        ]);
+
+     }
 
 
 
