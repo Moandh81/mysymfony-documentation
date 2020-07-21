@@ -83,5 +83,21 @@ class PostVoter extends Voter
 
 
 
+
+===========================================
+
+Template :
+
+
+{% if is_granted('POST_DELETE' , post) %}
+
+
+<a href="{{ path('delete' , {id: post.id} ) }}">Supprimer</a>
+
+
+{% endif %}
+
+
+
 ```
     
