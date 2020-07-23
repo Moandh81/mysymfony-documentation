@@ -1,0 +1,94 @@
+ProductContorller.php
+
+
+/**
+      *  @Route("/list", name="list_product")
+      */
+      public function list(Request $request) {
+
+
+
+        return $this->render('product/list.html.twig', [
+
+            'controller_name' => 'ProductController',
+
+
+        ]);
+
+      }
+
+
+       /**
+      *  @Route("/testajax", name="test_ajax")
+      */
+      public function testajax(Request $request , SerializerInterface $serializer) {
+
+      
+        if ($request->isXmlHttpRequest()) {
+            $repository = $this->getDoctrine()->getRepository(Product::class);
+            $products = $repository->findAll();
+
+            $response = new Response();
+            
+            
+            $jsonContent = $serializer->serialize($products, 'json');
+
+            // dd($jsonContent) ;
+
+            $response->setContent($jsonContent);
+
+            $response->headers->set('Content-Type', 'application/json');
+
+        }
+
+return $response ;
+
+
+      }
+      
+      
+      
+      
+      
+      
+      
+      =================================================================================
+      
+      
+      
+      my.js
+      
+      
+      
+      
+      
+      $(document).ready(function () {
+   
+
+    $('#mybutton').click(function (e) { 
+        e.preventDefault();
+        console.log('clicked');
+
+        $.ajax({
+            type: "GET",
+            url: '/testajax',
+            data: "data",
+            dataType: "json",
+            success: function (response) {
+                console.log(response)
+
+                for (let index = 0; index < response.length; index++) {
+                    $('.list-group').append(  '<li class="list-group-item">'+ response[index].name + '</li>'
+                    );
+                    
+                }
+                $("#mybutton").prop('disabled', true);
+            }
+        });
+        
+    });
+});
+
+
+
+
