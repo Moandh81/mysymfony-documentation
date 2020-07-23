@@ -1,0 +1,107 @@
+1 :   $composer require symfony/event-dispatcher
+
+
+2 : composer dump-autoload
+
+
+
+3 :   create the src/Events/DemoEvent.php  
+
+================================================================
+<?php
+namespace EventDispatchers\Events;
+ 
+use Symfony\Component\EventDispatcher\Event;
+ 
+class DemoEvent extends Event
+{
+    const NAME = 'demo.event';
+ 
+    protected $foo;
+ 
+    public function __construct()
+    {
+        $this->foo = 'bar';
+    }
+ 
+    public function getFoo()
+    {
+        return $this->foo;
+    }
+}
+
+================================================================
+
+
+
+4 : create the listener class  src/Listeners/DemoListener.php  :
+
+
+
+<?php
+namespace EventDispatchers\Listeners;
+ 
+use Symfony\Component\EventDispatcher\Event;
+ 
+class DemoListener
+{
+    public function onDemoEvent(Event $event)
+    {
+      // fetch event information here
+      echo "DemoListener is called!\n";
+      echo "The value of the foo is: ".$event->getFoo()."\n";
+    }
+}
+
+
+
+
+
+================================================================
+
+
+
+5 : Call the event from the controller  :
+
+
+  public function index(Request $request)
+    {
+
+
+        $post = new Post() ;
+        $form = $this->createForm(PostType::class, $post);
+        $form->handleRequest($request);
+
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+
+            $post = $form->getData();
+
+            $entityManager = $this->getDoctrine()->getManager();
+             $entityManager->persist($post);
+             $entityManager->flush();
+
+
+             $dispatcher = new EventDispatcher() ;
+             $listener = new DemoListener() ;
+             $dispatcher->addListener('demo.event', array($listener, 'onDemoEvent'));
+             $dispatcher->dispatch(DemoEvent::NAME, new DemoEvent($post));
+
+
+
+
+
+
+
+        }
+
+
+
+        return $this->render('post/index.html.twig', [
+            'controller_name' => 'PostController',
+            'form' => $form->createView(),
+
+        ]);
+    }
