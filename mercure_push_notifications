@@ -1,0 +1,157 @@
+1: mkdir mercure
+
+2 cd mercure 
+
+
+3 wget https://github.com/dunglas/mercure/releases/download/v0.10.3/mercure_0.10.3_Linux_x86_64.tar.gz
+
+
+4 tar xfvz  mercure_0.10.3_Linux_x86_64.tar.gz
+
+
+5 from terminal :
+
+./mercure --jwt-key='!ChangeMe!' --addr=':3000' --debug --allow-anonymous --cors-allowed-origins='*' --publish-allowed-origins='http://localhost:3000'
+
+
+6 : go to http://localhost:3000/ 
+to have Hub Url 
+
+
+
+7 generate jwt token :  https://jwt.io/
+
+payload :
+
+
+{
+    "mercure": {
+        "publish": ["*"]
+    }
+}
+
+
+your-256-bit-secret  ==> !ChangeMe!
+
+
+get Encoded jwt token
+
+
+ 
+8- test from Postman :
+
+POST request on  http://localhost:3000/.well-known/mercure (HUB URL) :
+
+body:
+topic : http://monsite.com/ping
+data: 0 
+
+headers :  Authorization : Bearer + jwt token (with no quotes)
+
+
+Example of response  :  urn:uuid:0cf82025-978b-4be6-a338-18d86fac53ec 
+
+
+
+
+On javascript :
+
+
+    
+const url = new URL('http://localhost:3000/.well-known/mercure');
+url.searchParams.append('topic', 'http://monsite.com/ping');
+
+const eventSource = new EventSource(url);
+
+// The callback will be called every time an update is published
+eventSource.onmessage = e => {
+    console.log( parseInt($('#ping').text())  )
+
+    $("#ping").text(parseInt($('#ping').text()) + 1)
+    
+   
+
+}
+
+
+
+
+===========================================================================
+
+
+Symfony + mercure 
+
+
+
+ composer require mercure 
+
+
+
+
+.env file :
+
+
+
+###> symfony/mercure-bundle ###
+# See https://symfony.com/doc/current/mercure.html#configuration
+MERCURE_PUBLISH_URL=http://localhost:3000/.well-known/mercure
+# The default token is signed with the secret key: !ChangeMe!
+MERCURE_JWT_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtZXJjdXJlIjp7InB1Ymxpc2giOltdfX0.Oo0yg7y4yMa1vr_bziltxuTCqb8JVHKxp-f_FwwOim0
+###< symfony/mercure-bundle ###
+
+
+
+==========================================================================================================
+
+
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Mercure\PublisherInterface;
+use Symfony\Component\Mercure\Update;
+
+class SportController extends AbstractController
+{
+    /**
+     * @Route("/sport", name="sport" )
+     */
+    public function index()
+    {
+
+     
+
+
+
+        return $this->render('sport/index.html.twig', [
+            'controller_name' => 'SportController',
+        ]);
+    }
+
+
+    /**
+     * @Route("/ping", name="ping" )
+     */
+    public function ping(PublisherInterface $publisher) {
+
+        $update = new Update(
+            'http://monsite.com/ping',
+            json_encode(['status' => 'OutOfStock'])
+        );
+
+
+        $publisher($update);
+
+        return $this->redirectToRoute('sport') ;
+
+    }
+}
+
+
+
+
+
+
+==========================================================================================================
