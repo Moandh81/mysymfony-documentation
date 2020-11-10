@@ -1,0 +1,40 @@
+<?php
+
+namespace App\DataFixtures;
+
+use App\Entity\Person;
+use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Persistence\ObjectManager;
+use Faker;
+
+
+class PersonFixtures extends Fixture
+{
+    public function load(ObjectManager $manager)
+    {
+        // $product = new Product();
+        // $manager->persist($product);
+
+
+        $faker = Faker\Factory::create('fr_FR');
+
+
+            // On crée 100 personnes
+            for ($i=0; $i < 100 ; $i++) { 
+                $person = new Person() ;
+                $person->setName($faker->name) ;
+                $person->setAddress($faker->streetAddress) ;
+                $person->setCity($faker->city) ;
+                $person->setZipcode($faker->postcode) ;
+                $person->setEmail($faker->safeEmail);
+                $person->setDescription($faker->paragraph($nbSentences = random_int(1, 6), $variableNbSentences = true));
+                $person->setCreatedAt($faker->dateTimeBetween($startDate = '-6 months', $endDate = 'now', $timezone = null)) ;
+                $person->setUpdatedAt($faker->dateTimeBetween($startDate = $person->getCreatedAt(), $endDate = 'now', $timezone = null)) ;
+                $manager->persist($person);
+                
+            }
+
+
+        $manager->flush();
+    }
+}
