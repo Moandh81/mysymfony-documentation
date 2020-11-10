@@ -1,0 +1,73 @@
+https://symfonycasts.com/screencast/symfony-uploads/upload-in-form
+
+composer require gedmo/doctrine-extensions
+
+
+
+<?php
+
+namespace App\Controller;
+
+use App\Form\ContactType;
+use Gedmo\Sluggable\Util\Urlizer;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+
+class UploadController extends AbstractController
+{
+    /**
+     * @Route("/upload", name="upload")
+     */
+    public function index(Request $request): Response
+    {
+
+
+        $form = $this->createForm(ContactType::class);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+            $uploadedFile = $form['images']->getData();
+
+
+
+
+            $destination = $this->getParameter('kernel.project_dir').'/public/uploads';
+
+
+            for ($i=0; $i < count($uploadedFile) ; $i++) { 
+            
+                
+
+                $originalFilename = pathinfo($uploadedFile[$i]->getClientOriginalName(), PATHINFO_FILENAME);
+                $newFilename = Urlizer::urlize($originalFilename).'-'.uniqid().'.'.$uploadedFile[$i]->guessExtension();
+                $uploadedFile[$i]->move(
+                    $destination,
+                    $newFilename
+                );
+    
+
+
+            }
+
+            
+
+
+        }
+
+
+
+
+
+        return $this->render('upload/index.html.twig', [
+            'controller_name' => 'UploadController',
+            'form' => $form->createView(),
+
+        ]);
+    }
+}
