@@ -1,0 +1,1 @@
+$projectdir =  $this->getParameter('kernel.project_dir');
