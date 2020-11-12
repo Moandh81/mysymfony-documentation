@@ -1,0 +1,11 @@
+ composer require liip/imagine-bundle
+
+
+Insctruction after package installation :
+
+         Getting started using liip/imagine-bundle          
+
+  Configure your transformations:
+    1. You MUST verify and uncomment the configuration in config/packages/liip_imagine.yaml.
+    2. You MAY configure your image transformation library (gmagick, imagick, or gd [default]).
+    3. You MAY define custom transformation definitions under the filter_sets option.
