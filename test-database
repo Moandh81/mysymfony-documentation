@@ -1,0 +1,68 @@
+
+
+
+php bin/console doctrine:database:create --env=test
+php bin/console doctrine:migrations:migrate --help
+php bin/console doctrine:fixtures:load --env=test
+
+php bin/phpunit tests/TestUser.php
+
+
+
+
+
+
+
+
+
+
+
+
+<?php
+
+namespace App\Tests;
+
+use App\Entity\User;
+use App\Repository\UserRepository;
+use Doctrine\Persistence\ObjectRepository;
+use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+
+
+
+class UserTest extends KernelTestCase
+{
+    public function testSomething()
+    {
+
+        $user = new User() ;
+
+        $user->setEmail("anis.dhouieb@gmail.com") ; 
+
+        $user->setPassword("password") ;
+
+        $this->assertEquals("anis.dhouieb@gmail.com" , $user->getEmail()) ;
+    }
+
+
+
+
+    public function testCount()
+    {
+
+        self::bootKernel() ;
+        $users = self::$container->get(UserRepository::class)->count([]) ;
+
+        $this->assertEquals(100 , $users) ;
+
+    }
+
+
+
+
+
+
+
+
+}
