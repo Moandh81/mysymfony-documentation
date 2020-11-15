@@ -1,0 +1,193 @@
+config/packages/vich_uploader.yml
+
+
+vich_uploader:
+    db_driver: orm
+
+    mappings:
+       cat_images:
+           uri_prefix: /images/cats
+           upload_destination: '%kernel.project_dir%/public/images/cats'
+
+
+
+
+
+==========================================================================================================================
+
+
+Cat.php
+
+
+<?php
+
+namespace App\Entity;
+
+use App\Repository\CatRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+
+/**
+ * @ORM\Entity(repositoryClass=CatRepository::class)
+ * @Vich\Uploadable
+ */
+class Cat
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @var string
+     */
+    private $image;
+
+    /**
+     * @var File
+    * @Vich\UploadableField(mapping="cat_images", fileNameProperty="image")
+     */
+    private $imageFile;
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+
+    public function getImageFile(): ?File
+    {
+        return $this->imageFile;
+    }
+
+    public function setImageFile(File $imageFile): self
+    {
+        $this->imageFile = $imageFile;
+
+        return $this;
+    }
+}
+
+
+===============================================================================
+
+CatType.php
+
+
+
+
+<?php
+
+namespace App\Form;
+
+use App\Entity\Cat;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Vich\UploaderBundle\Form\Type\VichImageType;
+
+class CatType extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+        ->add('image' , TextType::class )
+
+            ->add('imageFile' , VichImageType::class )
+            ->add('submit' , SubmitType::class)
+        ;
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'data_class' => Cat::class,
+        ]);
+    }
+}
+
+
+
+
+================================================================================
+
+
+CatController.php
+
+
+
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Cat;
+use App\Form\CatType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+
+
+class CatController extends AbstractController
+{
+    /**
+     * @Route("/cat", name="cat")
+     */
+    public function index(Request $request): Response
+    {
+
+        $cat = new Cat() ;
+
+
+        $form = $this->createForm(CatType::class, $cat);
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+
+           $cat = $form->getData()
+           ; 
+
+
+         $entityManager = $this->getDoctrine()->getManager();
+         $entityManager->persist($cat);
+         $entityManager->flush();
+
+         return $this->redirectToRoute('style');
+
+            
+
+
+        }
+
+        return $this->render('cat/index.html.twig', [
+            'controller_name' => 'CatController',
+            'form' => $form->createView() 
+        ]);
+    }
+}
+
+
+
+
+
