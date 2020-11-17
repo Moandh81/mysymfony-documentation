@@ -1,0 +1,241 @@
+1 : create src/Event/PostPublishedEvent.php
+
+
+
+
+<?php
+
+
+namespace App\Events ;
+
+use App\Entity\Post;
+use Symfony\Component\EventDispatcher\Event;
+
+class PostPublishedEvent extends Event {
+
+
+        const NAME = "post.published" ;
+
+
+    private $post ;
+
+    public function __construct(Post $post) {
+
+        $this->post = $post ;
+    }
+
+
+    public function getPost() {
+
+        return $this->post ;
+    }
+
+
+
+    
+
+}
+
+
+
+
+==========================================================================
+==========================================================================
+==========================================================================
+
+
+
+
+2 create PostPublishedSubscriber.php
+
+
+
+
+<?php
+
+namespace App\Events ;
+
+
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class PostPublishedSubscriber implements EventSubscriberInterface {
+
+
+
+
+/**
+ * Undocumented variable
+ *
+ * @var \Swift_Mailer $mailer
+ */
+    private $mailer ;
+
+
+
+    public function __construct(\Swift_Mailer $mailer )
+    {
+        
+        $this->mailer = $mailer;
+    }
+
+    public static function getSubscribedEvents() {
+
+        return [
+            PostPublishedEvent::NAME => 'onPostPublished'
+        ] ;
+    }
+
+    public function onPostPublished(PostPublishedEvent $event  ) {
+
+        
+        
+
+        $post = $event->getPost() ;
+
+        $message = (new \Swift_Message("Hello From Post published number " . $post->getId()))
+        ->setFrom('samir@gmail.com')
+        ->setTo('anis.dhouieb@gmail.com')
+        ->setBody("The connected user is ") ;
+
+        $this->mailer->send($message) ;
+
+
+
+    }
+
+    
+}
+
+
+
+
+==========================================================================
+==========================================================================
+==========================================================================
+
+
+3 - At the level of the controller  :
+
+
+
+
+    /**
+     * @Route("/post", name="post")
+     */
+    public function index(EventDispatcherInterface $dispatcher): Response
+    {
+
+        $entityManager = $this->getDoctrine()->getManager() ;
+
+        $tags =  $this->getDoctrine()
+        ->getRepository(Tag::class)
+        ->findOneBy([
+            'id' => mt_rand(1,5)
+        ]) ;
+
+        $post = new Post() ;
+        $post->setName("Article 2") ;
+        $post->setDescription("Article 2") ;
+        $post->addTag($tags) ;
+
+
+        $entityManager->persist($post);
+        $entityManager->flush() ;
+
+        $event = new PostPublishedEvent($post) ;
+
+        $dispatcher->dispatch(PostPublishedEvent::NAME , $event  ) ;
+
+
+
+
+
+        return $this->render('post/index.html.twig', [
+            'controller_name' => 'PostController',
+        ]);
+    }
+
+
+
+==========================================================================
+==========================================================================
+==========================================================================
+
+
+
+To get the twig template at the level of the eventsubscriber we have to use the EngineInterface at the level of the constructor
+of the Eventsubscriber
+:
+
+
+http://benjamin.leveque.me/symfony2-bonnes-pratiques-pour-l-envoi-de-mail.html
+
+
+==========================================================================
+==========================================================================
+==========================================================================
+
+To get the connected user at the level of the Event Subscriber 
+we have to get the Security component :
+
+
+
+
+<?php
+
+namespace App\Events ;
+
+
+use Symfony\Component\Security\Core\Security;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class PostPublishedSubscriber implements EventSubscriberInterface {
+
+
+
+
+/**
+ * Undocumented variable
+ *
+ * @var \Swift_Mailer $mailer
+ */
+    private $mailer ;
+
+
+
+    public function __construct(\Swift_Mailer $mailer , Security $security )
+    {
+        
+        $this->mailer = $mailer;
+        $this->security = $security;
+
+    }
+
+    public static function getSubscribedEvents() {
+
+        return [
+            PostPublishedEvent::NAME => 'onPostPublished'
+        ] ;
+    }
+
+    public function onPostPublished(PostPublishedEvent $event  ) {
+
+        
+        $post = $event->getPost() ;
+
+
+      
+
+        $message = (new \Swift_Message("Hello From Post published number " . $post->getId()))
+        ->setFrom('samir@gmail.com')
+        ->setTo('anis.dhouieb@gmail.com')
+        ->setBody("The connected user is " . $this->security->getUser()->getEmail()) ;
+
+        $this->mailer->send($message) ;
+
+
+
+    }
+
+    
+}
