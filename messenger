@@ -1,0 +1,17 @@
+Message after messenger installation :
+   
+ What's next? 
+              
+
+  * You're ready to use the Messenger component. You can define your own message buses
+    or start using the default one right now by injecting the message_bus service
+    or type-hinting Symfony\Component\Messenger\MessageBusInterface in your code.
+
+  * To send messages to a transport and handle them asynchronously:
+
+    1. Uncomment the MESSENGER_TRANSPORT_DSN env var in .env
+       and framework.messenger.transports.async in config/packages/messenger.yaml;
+    2. Route your message classes to the async transport in config/packages/messenger.yaml.
+
+  * Read the documentation at https://symfony.com/doc/current/messenger.html
+
