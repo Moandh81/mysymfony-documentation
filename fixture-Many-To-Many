@@ -2,54 +2,44 @@
 
 namespace App\DataFixtures;
 
-use Faker;
-use App\Entity\Product;
-use App\Entity\Category;
+use Faker ;
+use App\Entity\Tag;
+use App\Entity\Post;
+use App\DataFixtures\TagFixtures;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 
-class ProductFixtures extends Fixture
+
+class PostFixtures extends Fixture
 {
     public function load(ObjectManager $manager)
     {
         // $product = new Product();
-
         // $manager->persist($product);
 
         $faker = Faker\Factory::create('fr_FR');
 
+for ($i=0; $i < 100 ; $i++) { 
+    # code...
 
-for ($i=0; $i <100 ; $i++) { 
+    $post = new Post() ;
+    $post->setName($faker->sentence) ;
 
-
-    $product = new Product() ;
-
-    $product->setName($faker->sentence) ;
-    $product->setPrice(mt_rand(40,1000)) ;
-    $product->setDescription($faker->sentence) ;
-    $product->setPromotion(false) ;
-    $product->setImage($faker->imageUrl(280, 190, 'cats')) ;
-
-
-    for ($j=1; $j < mt_rand(2,5) ; $j++) { 
-        $category = new Category() ;
-        $category->setName($faker->word());
-
-        $manager->persist($category) ;
-        
+    for ($j=1; $j < mt_rand(2,6) ; $j++) { 
+      $tag = new Tag() ;
+      $tag->setName($faker->word) ;
+    $post->addTag($tag) ;
+      $manager->persist($tag) ;
     }
 
-
-    $manager->persist($product) ;
-
-
-
-
+    $manager->persist($post) ;
 
 }
 
 
-
         $manager->flush();
     }
+
+
+  
 }
