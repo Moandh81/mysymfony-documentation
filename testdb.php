@@ -10,6 +10,12 @@ class BookTest extends KernelTestCase
 {
 
 
+    
+     /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+        private $entityManager;
+    
 
     protected function setUp(): void
     {
