@@ -39,6 +39,10 @@ et choisir l'option Kerneltestcase
 car on a besoin du kernel pour récupérer le repository 
 
 
+=================================================================
+
+# tester les entités  :
+
 
 
 
